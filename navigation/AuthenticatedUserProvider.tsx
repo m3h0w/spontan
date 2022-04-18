@@ -1,12 +1,12 @@
 import { auth, firestore } from 'config/firebase';
 import { User } from 'firebase/auth';
 import React, { createContext, useEffect, useState } from 'react';
-import { ConvertedFirestoreUser, FirestoreUser, Item } from 'types/User';
+import { FirestoreUser } from 'types/User';
 
 export const AuthenticatedUserContext = createContext<{
-  user?: ConvertedFirestoreUser | null;
+  user?: FirestoreUser | null;
   setUser: React.Dispatch<
-    React.SetStateAction<ConvertedFirestoreUser | null | undefined>
+    React.SetStateAction<FirestoreUser | null | undefined>
   >;
 }>({ user: null, setUser: () => {} });
 
@@ -15,15 +15,8 @@ export const useAuthenticatedUser = () => {
   return user;
 };
 
-const convertItemIds = async (items: string[]): Promise<Item[]> => {
-  const i = await firestore.getItems(items as string[]);
-  return i;
-};
-
 export const AuthenticatedUserProvider: React.FC = ({ children }) => {
-  const [user, setUser] = useState<ConvertedFirestoreUser | null | undefined>(
-    undefined,
-  );
+  const [user, setUser] = useState<FirestoreUser | null | undefined>(undefined);
 
   // Handle user state changes
   async function onAuthStateChanged(user: User | null) {
@@ -33,15 +26,7 @@ export const AuthenticatedUserProvider: React.FC = ({ children }) => {
         console.log('MAKING A NEW USER');
         dbUser = await firestore.newUser(user);
       }
-      firestore.listenToUser(dbUser?.uid, async snapshot => {
-        console.log('LISTENER ON USER TRIGGERED', snapshot.data());
-        const newUser = snapshot.data() as FirestoreUser;
-        const items = await convertItemIds(newUser.items);
-        setUser({
-          ...newUser,
-          items,
-        });
-      });
+      setUser(dbUser);
       return;
     }
     setUser(null);

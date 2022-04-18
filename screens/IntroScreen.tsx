@@ -33,10 +33,12 @@ export const ParticleBackgroundContainer: FC = ({ children }) => {
         style={{
           position: 'absolute',
           flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
+          display: 'flex',
+          top: 0,
+          left: 0,
           width: '100%',
           height: '100%',
+          backgroundColor: 'transparent',
         }}
       >
         {children}
@@ -76,7 +78,7 @@ const IntroScreen: FC<Props> = ({ navigation }) => {
         </Caption>
         <Button
           color={'#fff'}
-          onPress={() => navigation.navigate('Signup')}
+          onPress={() => navigation.navigate('Login')}
           mode="contained"
         >
           Get started

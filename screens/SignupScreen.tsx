@@ -2,6 +2,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { ErrorMessage, InputField } from 'components';
 import B from 'components/B';
 import SpontanHeadline from 'components/SpontanHeadline';
+import ViewColumn from 'components/ViewColumn';
 import { auth } from 'config/firebase';
 import { StatusBar } from 'expo-status-bar';
 import { AVAILABLE_FONTS } from 'hooks/useCachedResources';
@@ -60,86 +61,98 @@ const SignupScreen: FC<StackScreenProps<AuthStackParamList, 'Signup'>> = ({
   return (
     <FormProvider {...formMethods}>
       <ParticleBackgroundContainer>
-        <SpontanHeadline style={{ marginBottom: 20 }} />
-        <Caption
-          style={{
-            fontSize: scaled(25),
-            paddingBottom: 20,
-            fontFamily: AVAILABLE_FONTS.DancingScript_400Regular,
-          }}
+        <ViewColumn
+          style={[
+            {
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center ',
+            },
+          ]}
         >
-          Stop planning. Start living. Join us!
-        </Caption>
-        <InputField
-          inputStyle={{
-            fontSize: 14,
-          }}
-          containerStyle={{
-            backgroundColor: '#fff',
-            marginBottom: 20,
-            width: '80%',
-          }}
-          leftIcon="email"
-          placeholder="Email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          textContentType="emailAddress"
-          autoFocus
-          name="email"
-        />
-        <InputField
-          inputStyle={{
-            fontSize: 14,
-          }}
-          containerStyle={{
-            backgroundColor: '#fff',
-            marginBottom: 15,
-            width: '80%',
-          }}
-          leftIcon="lock"
-          placeholder="Password"
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry={passwordVisibility}
-          textContentType="password"
-          rightIcon={rightIcon}
-          handlePasswordVisibility={handlePasswordVisibility}
-          name="password"
-        />
-        {signupError ? <ErrorMessage error={signupError} visible /> : null}
-        <PaperButton
-          mode="contained"
-          onPress={handleSubmit(onHandleSignup)}
-          color={'#222'}
-          style={{
-            marginTop: 5,
-            width: '80%',
-          }}
-          loading={formState.isSubmitting}
-          disabled={formState.isSubmitting}
-          icon={formState.isSubmitting ? 'loading' : undefined}
-        >
-          Sign up
-        </PaperButton>
-
-        <View style={styles.loginSection}>
-          <DividerWithText style={{ marginBottom: 0 }}>
-            Already with us?
-          </DividerWithText>
-          <PaperButton
-            mode={'contained'}
-            onPress={() =>
-              navigation.navigate('Login', {
-                email: getValues('email'),
-                password: getValues('password'),
-              })
-            }
-            color="#fff"
-            disabled={formState.isSubmitting}
+          <SpontanHeadline style={{ marginBottom: 20 }} />
+          <Caption
+            style={{
+              fontSize: scaled(25),
+              paddingBottom: 20,
+              fontFamily: AVAILABLE_FONTS.DancingScript_400Regular,
+            }}
           >
-            Login
+            Stop planning. Start living. Join us!
+          </Caption>
+          <InputField
+            inputStyle={{
+              fontSize: 14,
+            }}
+            containerStyle={{
+              backgroundColor: '#fff',
+              marginBottom: 20,
+              width: '80%',
+            }}
+            leftIcon="email"
+            placeholder="Email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            autoFocus
+            name="email"
+            mode="outlined"
+          />
+          <InputField
+            inputStyle={{
+              fontSize: 14,
+            }}
+            containerStyle={{
+              backgroundColor: '#fff',
+              marginBottom: 15,
+              width: '80%',
+            }}
+            leftIcon="lock"
+            placeholder="Password"
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry={passwordVisibility}
+            textContentType="password"
+            rightIcon={rightIcon}
+            handlePasswordVisibility={handlePasswordVisibility}
+            name="password"
+            mode="outlined"
+          />
+          {signupError ? <ErrorMessage error={signupError} visible /> : null}
+          <PaperButton
+            mode="contained"
+            onPress={handleSubmit(onHandleSignup)}
+            color={'#222'}
+            style={{
+              marginTop: 5,
+              width: '80%',
+            }}
+            loading={formState.isSubmitting}
+            disabled={formState.isSubmitting}
+            icon={formState.isSubmitting ? 'loading' : undefined}
+          >
+            Sign up
           </PaperButton>
-        </View>
+
+          <View style={styles.loginSection}>
+            <DividerWithText style={{ marginBottom: 0 }}>
+              Already with us?
+            </DividerWithText>
+            <PaperButton
+              mode={'contained'}
+              onPress={() =>
+                navigation.navigate('Login', {
+                  email: getValues('email'),
+                  password: getValues('password'),
+                })
+              }
+              color="#fff"
+              disabled={formState.isSubmitting}
+            >
+              Login
+            </PaperButton>
+          </View>
+        </ViewColumn>
       </ParticleBackgroundContainer>
     </FormProvider>
   );

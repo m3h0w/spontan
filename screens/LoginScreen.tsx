@@ -1,5 +1,6 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import SpontanHeadline from 'components/SpontanHeadline';
+import ViewColumn from 'components/ViewColumn';
 import { auth } from 'config/firebase';
 import { AVAILABLE_FONTS } from 'hooks/useCachedResources';
 import { AuthStackParamList } from 'navigation/AuthStack';
@@ -61,74 +62,87 @@ const LoginScreen: FC<StackScreenProps<AuthStackParamList, 'Login'>> = ({
   return (
     <FormProvider {...formMethods}>
       <ParticleBackgroundContainer>
-        <SpontanHeadline style={{ marginBottom: 20 }} />
-        <Caption
-          style={{
-            fontSize: scaled(25),
-            paddingBottom: 20,
-            fontFamily: AVAILABLE_FONTS.DancingScript_400Regular,
-          }}
+        <ViewColumn
+          style={[
+            {
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center ',
+            },
+          ]}
         >
-          Spontaneous adventures await.
-        </Caption>
-        <InputField
-          containerStyle={{
-            backgroundColor: '#fff',
-            marginBottom: 20,
-            width: '80%',
-          }}
-          leftIcon="email"
-          placeholder="Email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          textContentType="emailAddress"
-          autoFocus
-          name={'email'}
-        />
-        <InputField
-          containerStyle={{
-            backgroundColor: '#fff',
-            marginBottom: 15,
-            width: '80%',
-          }}
-          leftIcon="lock"
-          placeholder="Password"
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry={passwordVisibility}
-          textContentType="password"
-          rightIcon={rightIcon}
-          handlePasswordVisibility={handlePasswordVisibility}
-          name={'password'}
-        />
-        {loginError ? <ErrorMessage error={loginError} visible /> : null}
-        <PaperButton
-          mode="contained"
-          onPress={handleSubmit(onLogin)}
-          color={'#222'}
-          style={{
-            marginTop: 5,
-            width: '80%',
-          }}
-          loading={formState.isSubmitting}
-          disabled={formState.isSubmitting}
-          icon={formState.isSubmitting ? 'loading' : undefined}
-        >
-          Login
-        </PaperButton>
-        <PaperButton
-          onPress={() =>
-            navigation.navigate('Signup', {
-              email: getValues('email'),
-              password: getValues('password'),
-            })
-          }
-          labelStyle={{ fontSize: scaled(14) }}
-          color={'#999'}
-          disabled={formState.isSubmitting}
-        >
-          Don't have an account? Sign up
-        </PaperButton>
+          <SpontanHeadline style={{ marginBottom: 20 }} />
+          <Caption
+            style={{
+              fontSize: scaled(25),
+              paddingBottom: 20,
+              fontFamily: AVAILABLE_FONTS.DancingScript_400Regular,
+            }}
+          >
+            Spontaneous adventures await.
+          </Caption>
+          <InputField
+            containerStyle={{
+              backgroundColor: '#fff',
+              marginBottom: 20,
+              width: '80%',
+            }}
+            leftIcon="email"
+            placeholder="Email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            autoFocus
+            name={'email'}
+            mode="outlined"
+          />
+          <InputField
+            containerStyle={{
+              backgroundColor: '#fff',
+              marginBottom: 15,
+              width: '80%',
+            }}
+            leftIcon="lock"
+            iconColor="#000"
+            placeholder="Password"
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry={passwordVisibility}
+            textContentType="password"
+            rightIcon={rightIcon}
+            handlePasswordVisibility={handlePasswordVisibility}
+            name={'password'}
+            mode="outlined"
+          />
+          {loginError ? <ErrorMessage error={loginError} visible /> : null}
+          <PaperButton
+            mode="contained"
+            onPress={handleSubmit(onLogin)}
+            color={'#222'}
+            style={{
+              marginTop: 5,
+              width: '80%',
+            }}
+            loading={formState.isSubmitting}
+            disabled={formState.isSubmitting}
+            icon={formState.isSubmitting ? 'loading' : undefined}
+          >
+            Login
+          </PaperButton>
+          <PaperButton
+            onPress={() =>
+              navigation.navigate('Signup', {
+                email: getValues('email'),
+                password: getValues('password'),
+              })
+            }
+            labelStyle={{ fontSize: scaled(14) }}
+            color={'#999'}
+            disabled={formState.isSubmitting}
+          >
+            Don't have an account? Sign up
+          </PaperButton>
+        </ViewColumn>
       </ParticleBackgroundContainer>
     </FormProvider>
   );

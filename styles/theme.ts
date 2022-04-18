@@ -29,7 +29,7 @@ const PaperDefaultThemeExtended = {
     primary: '#00ff22',
     accent: '#de10a7',
     text: '#332d31',
-    background: '#fff',
+    background: 'transparent',
     surface: '#f2f2f2',
     disabled: '#aaa',
   },

@@ -65,7 +65,7 @@ export function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="WardrobeStack"
+      initialRouteName="HomeStack"
       screenOptions={{
         tabBarActiveTintColor: 'black',
         tabBarStyle: {

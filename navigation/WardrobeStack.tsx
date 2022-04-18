@@ -10,6 +10,8 @@ import { Image, View } from 'react-native';
 import SellItemScreen from 'screens/wardrobe/SellItem';
 import Wardrobe from 'screens/wardrobe/Wardrobe';
 import { Item } from 'types/User';
+import { Logo } from './AuthStack';
+import { SpontanHeaderTitle } from './HomeStack';
 
 export type WardrobeStackParamList = {
   Wardrobe: undefined;
@@ -21,7 +23,7 @@ const Stack = createStackNavigator<WardrobeStackParamList>();
 const wardrobeHeaderOptions: StackNavigationOptions = {
   title: 'Your wardrobe',
   headerStyle: {
-    height: 80,
+    height: 100,
   },
   headerTitleAlign: 'center',
   headerTitleStyle: {
@@ -47,21 +49,14 @@ const wardrobeHeaderOptions: StackNavigationOptions = {
 
 function WardrobeStack(props: any) {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerRight: () => (
-          <Image
-            source={LogoSmall}
-            style={{ width: 25, height: 25, marginRight: 20 }}
-          />
-        ),
-      }}
-    >
+    <Stack.Navigator screenOptions={{}}>
       <Stack.Screen
         name="Wardrobe"
         component={Wardrobe}
         options={{
           ...wardrobeHeaderOptions,
+          headerTitle: SpontanHeaderTitle,
+          headerRight: DropdownComponent,
         }}
       />
       <Stack.Screen
@@ -70,6 +65,8 @@ function WardrobeStack(props: any) {
         options={{
           title: '',
           ...wardrobeHeaderOptions,
+          headerTitle: SpontanHeaderTitle,
+          headerRight: DropdownComponent,
         }}
       />
     </Stack.Navigator>

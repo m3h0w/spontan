@@ -19,32 +19,36 @@ export type AuthStackParamList = {
   };
 };
 
+export const Logo = () => {
+  return (
+    <Caption
+      style={{
+        borderRadius: 200,
+        borderWidth: 1,
+        borderColor: '#000',
+        textAlign: 'center',
+        paddingTop: 1,
+        width: 25,
+        height: 25,
+        marginRight: 20,
+        fontSize: scaled(31),
+        paddingBottom: 20,
+        color: '#000',
+        fontFamily: AVAILABLE_FONTS.DancingScript_400Regular,
+      }}
+    >
+      S
+    </Caption>
+  );
+};
+
 const Stack = createStackNavigator<AuthStackParamList>();
 
 export default function AuthStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerRight: () => (
-          <Caption
-            style={{
-              borderRadius: 200,
-              borderWidth: 1,
-              borderColor: '#000',
-              textAlign: 'center',
-              paddingTop: 1,
-              width: 25,
-              height: 25,
-              marginRight: 20,
-              fontSize: scaled(31),
-              paddingBottom: 20,
-              color: '#000',
-              fontFamily: AVAILABLE_FONTS.DancingScript_400Regular,
-            }}
-          >
-            S
-          </Caption>
-        ),
+        headerRight: Logo,
       }}
     >
       <Stack.Screen

@@ -1,11 +1,8 @@
 import { Timestamp } from 'firebase/firestore';
-import { ItemBlueprint } from 'screens/camera/AddItemsScreen';
-import { Replace } from 'utils/types';
 
 export type FirestoreUserDTO = {
   email: string;
   uid: string;
-  items: string[];
 };
 
 export type FirestoreUser = {
@@ -13,21 +10,22 @@ export type FirestoreUser = {
   lastName?: string;
   email: string;
   uid: string;
-  items: string[];
   createdAt: Timestamp;
 };
 
-export type ConvertedFirestoreUser = Replace<FirestoreUser, { items: Item[] }>;
-
-export type Item = {
+export type EventDTO = {
   ownerId: string;
-  receiptDate: Timestamp;
-  sku: number;
-  brandName: string;
-  blueprintId: string;
-  blueprint: ItemBlueprint;
-  createdAt: Timestamp;
-  price: number | null;
+  name: string;
+  date: Date;
+  time: {
+    hours: number;
+    minutes: number;
+  };
+  description?: string;
+  location: string;
+  imageUrl?: string | null;
+  groups?: string[];
+  users?: string[];
 };
 
 export type Event = {
@@ -35,11 +33,15 @@ export type Event = {
   createdAt: Timestamp;
   name: string;
   date: Timestamp;
-  description: string;
+  time: {
+    hours: number;
+    minutes: number;
+  };
+  description?: string;
   location: string;
   imageUrl: string | null;
-  groups: string[];
-  users: string[];
+  groups?: string[];
+  users?: string[];
   confirmedUsers: string[];
   restrictions: {
     maxPeople: number;

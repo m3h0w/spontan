@@ -30,9 +30,9 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { getStorage, ref, getBlob, getDownloadURL } from 'firebase/storage';
-import { ItemBlueprint } from 'screens/camera/AddItemsScreen';
-import { Brand } from 'types/Brand';
-import { FirestoreUser, FirestoreUserDTO, Item } from 'types/User';
+import { EventDTO, Group } from 'types/User';
+import { FirestoreUser, FirestoreUserDTO, Event } from 'types/User';
+import { date } from 'yup';
 
 const firebaseConfig = {
   apiKey: Constants.manifest?.extra?.apiKey,
@@ -100,8 +100,8 @@ class StorageController {
     return getDownloadURL(pathReference);
   }
 
-  getBrandImage(brand: string) {
-    return this.getUrl(`brands/${brand.toLowerCase()}.png`);
+  getGroupImage(group: string) {
+    return this.getUrl(`groups/${group.toLowerCase()}.png`);
   }
 }
 
@@ -116,8 +116,8 @@ class FirestoreController {
 
     this.collections = {
       users: getCollection('users'),
-      items: getCollection('items'),
-      brands: getCollection('brands'),
+      events: getCollection('events'),
+      groups: getCollection('groups'),
     };
   }
 
@@ -133,7 +133,6 @@ class FirestoreController {
     const newFirestoreUser: FirestoreUserDTO = {
       email: email as string,
       uid,
-      items: [],
     };
     const docRef = doc(this.collections.users, uid);
     await setDoc(doc(this.collections.users, uid), {
@@ -167,63 +166,37 @@ class FirestoreController {
     return onSnapshot(doc(this.collections.users, userId), callback);
   }
 
-  async newItem(
-    userId: string,
-    blueprint: ItemBlueprint,
-    price: number | null,
-    receiptDate: Date,
-  ) {
-    const user = await this.getUser(userId);
-    if (!user) {
-      throw new Error(`User doesn't exist ${userId}`);
-    }
-    const newDocRef = doc(this.collections.items);
-    await setDoc(newDocRef, {
-      ownerId: userId,
-      receiptDate: Timestamp.fromDate(receiptDate),
-      sku: blueprint.itemSKU,
-      brandName: blueprint.brandName,
-      blueprintId: blueprint.id,
-      blueprint: blueprint,
-      createdAt: serverTimestamp(),
-      price,
-    });
-    await this.updateUser(userId, {
-      items: user.items ? user.items.concat(newDocRef.id) : [newDocRef.id],
+  listenToEvents(userId: string, callback: (events: Event[]) => void) {
+    const q = query(this.collections.events, where('ownerId', '==', userId));
+    return onSnapshot(q, querySnapshot => {
+      const events: Event[] = [];
+      querySnapshot.forEach(doc => {
+        events.push(doc.data() as Event);
+      });
+      callback(events);
     });
   }
 
-  async newItems(
-    userId: string,
-    blueprints: ItemBlueprint[],
-    prices: Array<number | null>,
-    receiptDate: Date,
-  ) {
-    const user = await this.getUser(userId);
-    if (!user) {
-      throw new Error(`User doesn't exist ${userId}`);
-    }
+  async newEvent(eventDTO: EventDTO) {
+    const newDocRef = doc(this.collections.events);
+    const newEvent = {
+      ...eventDTO,
+      createdAt: serverTimestamp(),
+      date: Timestamp.fromDate(eventDTO.date),
+    };
+    console.log('New event:', { newEvent });
+    await setDoc(newDocRef, newEvent);
+  }
+
+  async newEvents(eventDTOs: EventDTO[]) {
     const batch = writeBatch(this.firestoreInstance);
     const docRefs: DocumentReference<DocumentData>[] = [];
-    blueprints.forEach((blueprint, index) => {
-      const docRef = doc(this.collections.items);
+    eventDTOs.forEach(eventDTO => {
+      const docRef = doc(this.collections.events);
       docRefs.push(docRef);
-      batch.set(docRef, {
-        ownerId: userId,
-        receiptDate: Timestamp.fromDate(receiptDate),
-        sku: blueprint.itemSKU,
-        brandName: blueprint.brandName,
-        blueprintId: blueprint.id,
-        blueprint: blueprint,
-        createdAt: serverTimestamp(),
-        price: prices[index],
-      });
+      batch.set(docRef, { ...eventDTO, createdAt: serverTimestamp() });
     });
     await batch.commit();
-    const ids = docRefs.map(docRef => docRef.id);
-    await this.updateUser(userId, {
-      items: user.items ? [...user.items, ...ids] : [...ids],
-    });
   }
 
   async getAll<T>(collection: CollectionReference<DocumentData>) {
@@ -241,26 +214,27 @@ class FirestoreController {
     if (ids && !ids.length) {
       return [];
     }
-    const q = query(this.collections.items, where(documentId(), 'in', ids));
+    const q = query(this.collections.events, where(documentId(), 'in', ids));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => {
       return doc.data() as T;
     });
   }
 
-  async getAllItems(): Promise<Item[]> {
-    return await this.getAll(this.collections.items);
+  async getAllEvents(): Promise<Event[]> {
+    return await this.getAll(this.collections.events);
   }
 
-  async getItems(itemIds?: string[]): Promise<Item[]> {
-    const items = await this.getMultiple<Item>(this.collections.items, itemIds);
-    return items.sort(
-      (a, b) => b.receiptDate.toMillis() - a.receiptDate.toMillis(),
+  async getEvents(eventIds?: string[]): Promise<Event[]> {
+    const events = await this.getMultiple<Event>(
+      this.collections.events,
+      eventIds,
     );
+    return events.sort((a, b) => a.date.toMillis() - b.date.toMillis());
   }
 
-  async getAllBrands() {
-    return await this.getAll<Brand>(this.collections.brands);
+  async getAllGroups() {
+    return await this.getAll<Group>(this.collections.groups);
   }
 }
 

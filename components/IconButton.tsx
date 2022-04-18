@@ -7,13 +7,15 @@ function IconButtonComponent({
   size,
   onPress = () => {},
   name,
-  style,
+  style = {},
+  noBackground = false,
 }: {
   color: string;
   size: number;
   onPress?: () => void;
   name: any;
-  style: ViewStyle;
+  style?: ViewStyle;
+  noBackground?: boolean;
 }) {
   return (
     <Pressable
@@ -22,15 +24,26 @@ function IconButtonComponent({
           return [
             styles.base,
             {
+              backgroundColor: noBackground ? 'transparent' : '#fff',
+              borderWidth: noBackground ? 0 : 1,
+              width: size,
+              height: size,
+              ...style,
               opacity: 0.5,
-              backgroundColor: 'transparent',
             },
           ];
         }
 
         return [
           styles.base,
-          { opacity: 1, backgroundColor: 'transparent', ...style },
+          {
+            opacity: 1,
+            backgroundColor: noBackground ? 'transparent' : '#fff',
+            borderWidth: noBackground ? 0 : 1,
+            width: size,
+            height: size,
+            ...style,
+          },
         ];
       }}
       onPress={onPress}
@@ -44,6 +57,8 @@ const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 50,
+    borderColor: '#000',
   },
 });
 

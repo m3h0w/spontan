@@ -2,37 +2,76 @@ import { useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LogoSmall from 'assets/images/logo-small.png';
 import DropdownComponent from 'components/HeaderDropdown';
+import { AVAILABLE_FONTS } from 'hooks/useCachedResources';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { Text, Title } from 'react-native-paper';
+import { Caption, Text, Title } from 'react-native-paper';
 import { HomeScreen } from 'screens';
 import CameraScreen from 'screens/camera/CameraScreen';
+import AddEventScreen from 'screens/home/AddEventScreen';
 import BrandScreen from 'screens/home/BrandScreen';
-import ItemScreen from 'screens/home/ItemScreen';
+import EventScreen from 'screens/home/EventScreen';
 import { scaled } from 'styles/scaled';
 import { Brand } from 'types/Brand';
-import { Item } from 'types/User';
-import useForceNavigateToFirstItem from 'utils/forceNavigateToFirstItem';
+import { Event } from 'types/User';
+import { Logo } from './AuthStack';
 
 export type HomeStackParams = {
   Home: undefined;
   Brand: {
     brand: Brand;
-    items: Item[];
+    events: Event[];
   };
-  Item: {
-    item: Item;
+  Event: {
+    event: Event;
   };
+  AddEvent: undefined;
 };
 
 type Props = {
   ref: typeof CameraScreen;
 };
 
+export const SpontanHeaderTitle = () => {
+  return (
+    <View
+      style={{
+        marginLeft: -20,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}
+    >
+      <Logo />
+      <View style={{ marginTop: 10 }}>
+        <Title
+          style={{
+            marginBottom: 0,
+            fontWeight: 'bold',
+            lineHeight: 14,
+          }}
+        >
+          SPONTAN
+        </Title>
+        <Caption
+          style={{
+            marginTop: -5,
+            fontSize: 15,
+            letterSpacing: 0.2,
+            fontFamily: AVAILABLE_FONTS.DancingScript_700Bold,
+          }}
+        >
+          Adventures await
+        </Caption>
+      </View>
+    </View>
+  );
+};
+
 const Stack = createStackNavigator<HomeStackParams>();
 
 const HomeStack = (props: Props) => {
-  // useForceNavigateToFirstItem();
+  // useForceNavigateToFirstEvent();
 
   return (
     <Stack.Navigator
@@ -45,7 +84,7 @@ const HomeStack = (props: Props) => {
         component={HomeScreen}
         options={{
           headerMode: 'screen',
-          title: 'Shop resale',
+          title: 'Spontan',
           headerStyle: {
             height: 100,
           },
@@ -53,28 +92,7 @@ const HomeStack = (props: Props) => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
-          headerTitle: props => {
-            return (
-              <View
-                style={{
-                  marginLeft: -20,
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-              >
-                <Image source={LogoSmall} style={styles.logo} />
-                <View style={{ marginTop: -5 }}>
-                  <Title style={{ marginBottom: -3, fontWeight: 'bold' }}>
-                    {props.children}
-                  </Title>
-                  <Text style={{ fontFamily: 'WorkSans_300Light' }}>
-                    From trusted brands
-                  </Text>
-                </View>
-              </View>
-            );
-          },
+          headerTitle: SpontanHeaderTitle,
           headerRight: DropdownComponent,
         }}
       />
@@ -106,10 +124,10 @@ const HomeStack = (props: Props) => {
         getId={({ params }) => params.brand.name}
       />
       <Stack.Screen
-        name="Item"
-        component={ItemScreen}
+        name="Event"
+        component={EventScreen}
         options={({ route }) => ({
-          title: route.params.item.blueprint.itemName,
+          title: route.params.event.name,
           headerTitleAlign: 'center',
           headerTitle: props => {
             return (
@@ -136,7 +154,39 @@ const HomeStack = (props: Props) => {
           },
           headerRight: DropdownComponent,
         })}
-        getId={({ params }) => params.item.blueprint.itemName}
+        getId={({ params }) => params.event.name}
+      />
+      <Stack.Screen
+        name="AddEvent"
+        component={AddEventScreen}
+        options={({ route }) => ({
+          title: 'New Event',
+          headerTitleAlign: 'center',
+          headerTitle: props => {
+            return (
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Title
+                  style={{
+                    flex: 1,
+                    fontWeight: 'bold',
+                    fontSize: scaled(14),
+                    lineHeight: scaled(14),
+                  }}
+                >
+                  {props.children}
+                </Title>
+              </View>
+            );
+          },
+          headerRight: DropdownComponent,
+        })}
       />
     </Stack.Navigator>
   );

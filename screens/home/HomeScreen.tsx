@@ -1,11 +1,13 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import BrandImage1 from 'assets/images/brands/brand1.png';
-import BrandImage2 from 'assets/images/brands/brand2.png';
-import BrandImageX from 'assets/images/brands/brandX.png';
-import Loading, { Indicator } from 'components/Loading';
+import EventPlaceholderImage from 'assets/images/eventPlaceholder.jpg';
+import GroupImage1 from 'assets/images/groups/group1.png';
+import GroupImage2 from 'assets/images/groups/group2.png';
+import GroupImageX from 'assets/images/groups/groupX.png';
+import SkeletonLoading from 'components/SkeletonLoading';
+import { timeToString } from 'components/TimePickerInput';
 import { firestore } from 'config/firebase';
 import { StatusBar } from 'expo-status-bar';
-import navigation from 'navigation';
+import { useAuthenticatedUser } from 'navigation/AuthenticatedUserProvider';
 import { HomeStackParams } from 'navigation/HomeStack';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -14,40 +16,30 @@ import {
   Pressable,
   StyleProp,
   StyleSheet,
-  TextStyle,
+  View,
   ViewStyle,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { ActivityIndicator, Caption, Title } from 'react-native-paper';
+import { Caption, FAB, Title } from 'react-native-paper';
+import { ParticleBackgroundContainer } from 'screens/IntroScreen';
 import { scaled } from 'styles/scaled';
-import { Brand } from 'types/Brand';
-import { Item } from 'types/User';
+import { Event, Group } from 'types/User';
 import chunkArray from 'utils/chunkArray';
-import { View } from '../../components/Themed';
-import SkeletonContent from 'react-native-skeleton-content';
-import { PreStyleSheet } from 'types/Styles';
-import items from 'data/items';
-import SkeletonLoading from 'components/SkeletonLoading';
+import shadowStyle from 'utils/shadowStyle';
 
-const brandImages = [BrandImage1, BrandImage2, BrandImageX];
+const groupImages = [GroupImage1, GroupImage2, GroupImageX];
 
 const chooseRandomFromArray = (array: any[]) => {
   const randomIndex = Math.floor(Math.random() * array.length);
   return array[randomIndex];
 };
 
-const Brands: FC<{
-  brandsState: Brand[];
-  getBrandItems: (brand: Brand) => Item[];
+const Groups: FC<{
+  groupsState?: Group[];
+  getGroupEvents: (group: Group) => Event[];
   navigation: any;
-}> = ({ brandsState, navigation, getBrandItems }) => {
-  // if (brandsState.length === 0) {
-  //   <ActivityIndicator size="large" />;
-  // }
-
-  console.log(styles.brandImage);
-
-  const brandSkeleton = {
+}> = ({ groupsState, navigation, getGroupEvents }) => {
+  const groupSkeleton = {
     width: BRAND_IMAGE_WIDTH,
     height: BRAND_IMAGE_HEIGHT,
     marginLeft: 6,
@@ -55,37 +47,22 @@ const Brands: FC<{
   };
 
   return (
-    // <SkeletonContent
-    //   isLoading={brandsState.length === 0}
-    //   boneColor="#565656"
-    //   highlightColor="#232323"
-    //   animationType="pulse"
-    //   containerStyle={{
-    //     flex: 1,
-    //     width: '100%',
-    //     height: BRAND_IMAGE_WIDTH,
-    //     flexDirection: 'row',
-    //   }}
-    //   layout={[
-    //     { ...brandSkeleton, marginLeft: 0 },
-    //     brandSkeleton,
-    //     brandSkeleton,
-    //     brandSkeleton,
-    //   ]}
-    // >
     <SkeletonLoading
-      isLoading={brandsState.length === 0}
-      containerStyle={{ height: BRAND_IMAGE_HEIGHT }}
+      isLoading={!groupsState}
+      containerStyle={{
+        height: BRAND_IMAGE_HEIGHT,
+        backgroundColor: 'transparent',
+      }}
       layout={[
-        { ...brandSkeleton, marginLeft: 0 },
-        brandSkeleton,
-        brandSkeleton,
-        brandSkeleton,
+        { ...groupSkeleton, marginLeft: 0 },
+        groupSkeleton,
+        groupSkeleton,
+        groupSkeleton,
       ]}
     >
       <ScrollView
         horizontal={true}
-        contentContainerStyle={styles.brandsRow}
+        contentContainerStyle={styles.groupsRow}
         style={{
           shadowColor: '#000',
           shadowOffset: {
@@ -94,40 +71,45 @@ const Brands: FC<{
           },
           shadowOpacity: 0.1,
           shadowRadius: 2.65,
+          backgroundColor: 'transparent',
         }}
       >
-        {[...brandsState, ...brandsState].map((brand, k) => {
-          const style: StyleProp<ImageStyle>[] = [styles.brandImage];
-          if (k !== 0) {
-            style.push(styles.imageLeftBorder);
-          }
-          return (
-            <Pressable
-              key={k}
-              onPress={() =>
-                navigation.navigate('Brand', {
-                  brand,
-                  items: getBrandItems(brand),
-                })
-              }
-            >
-              <Image source={brandImages[k % 3]} style={style} />
-            </Pressable>
-          );
-        })}
+        {groupsState &&
+          [...groupsState, ...groupsState].map((group, k) => {
+            const style: StyleProp<ImageStyle>[] = [styles.groupImage];
+            if (k !== 0) {
+              style.push(styles.imageLeftBorder);
+            }
+            return (
+              <Pressable
+                key={k}
+                onPress={() =>
+                  navigation.navigate('Group', {
+                    group,
+                    events: getGroupEvents(group),
+                  })
+                }
+              >
+                <Image source={groupImages[k % 3]} style={style} />
+              </Pressable>
+            );
+          })}
       </ScrollView>
     </SkeletonLoading>
   );
 };
 
-const Items: FC<{ itemsState: Item[]; navigation: any }> = ({
-  itemsState,
+const Events: FC<{ eventsState?: Event[]; navigation: any }> = ({
+  eventsState,
   navigation,
 }) => {
-  const itemChunks = useMemo(() => chunkArray(itemsState, 3), [itemsState]);
+  const eventChunks = useMemo(
+    () => (eventsState ? chunkArray(eventsState, 3) : []),
+    [eventsState],
+  );
 
-  const ItemRowSkeleton: FC = ({ children }) => {
-    const itemSkeleton = {
+  const EventRowSkeleton: FC = ({ children }) => {
+    const eventSkeleton = {
       flex: 1,
       width: ITEM_IMAGE_SIZE,
       height: ITEM_IMAGE_SIZE,
@@ -137,12 +119,12 @@ const Items: FC<{ itemsState: Item[]; navigation: any }> = ({
     };
     return (
       <SkeletonLoading
-        isLoading={itemsState.length === 0}
-        containerStyle={styles.itemsGrid}
+        isLoading={!eventsState}
+        containerStyle={styles.eventsGrid}
         layout={[
-          { ...itemSkeleton, marginLeft: 0 },
-          itemSkeleton,
-          itemSkeleton,
+          { ...eventSkeleton, marginLeft: 0 },
+          eventSkeleton,
+          eventSkeleton,
         ]}
       >
         {children}
@@ -151,69 +133,73 @@ const Items: FC<{ itemsState: Item[]; navigation: any }> = ({
   };
 
   return (
-    <View>
-      <View style={styles.itemsHeading}>
+    <View style={{ backgroundColor: 'transparent' }}>
+      <View style={styles.eventsHeading}>
         <Title style={{ fontSize: scaled(17), lineHeight: scaled(20) }}>
-          Just in from resellers
+          {eventsState && eventsState.length == 0
+            ? 'No events found'
+            : 'Your events'}
         </Title>
       </View>
-      <ItemRowSkeleton>
-        {itemChunks.map((items: Item[], rowNum: number) => {
-          return (
-            <View style={styles.itemsRow} key={rowNum}>
-              {items.map((item: Item, num: number) => {
-                const classes = [styles.item] as ViewStyle[];
-                if (num !== 0) {
-                  classes.push(styles.imageLeftBorder);
-                }
-                return (
-                  <Pressable
-                    key={num}
-                    onPress={() => {
-                      navigation.navigate('Item', { item });
+      <EventRowSkeleton>
+        {eventsState &&
+          eventsState.map((event: Event, num: number) => {
+            const classes = [styles.event] as ViewStyle[];
+            if (num !== 0) {
+              classes.push(styles.imageLeftBorder);
+            }
+            return (
+              <Pressable
+                key={num}
+                onPress={() => {
+                  console.log(event.name);
+                  navigation.navigate('Event', { event });
+                }}
+                style={classes}
+              >
+                <Image
+                  source={
+                    event.imageUrl
+                      ? {
+                          uri: event.imageUrl,
+                        }
+                      : EventPlaceholderImage
+                  }
+                  style={styles.eventImage}
+                />
+                <View
+                  style={{
+                    paddingLeft: 5,
+                    paddingRight: 5,
+                    paddingBottom: 5,
+                    backgroundColor: 'transparent',
+                  }}
+                >
+                  <Title
+                    style={{
+                      fontSize: scaled(12),
+                      lineHeight: scaled(13),
                     }}
-                    style={classes}
                   >
-                    <Image
-                      source={{
-                        uri: chooseRandomFromArray(item.blueprint.itemImg),
-                      }}
-                      style={styles.itemImage}
-                    />
-                    <View
-                      style={{
-                        paddingLeft: 5,
-                        paddingRight: 5,
-                        paddingBottom: 5,
-                      }}
-                    >
-                      <Title
-                        style={{
-                          fontSize: scaled(12),
-                          lineHeight: scaled(13),
-                        }}
-                      >
-                        {item.blueprint.itemName}
-                      </Title>
-                      <Caption
-                        style={{
-                          fontSize: scaled(9),
-                          lineHeight: scaled(10),
-                        }}
-                      >
-                        {item.brandName} | {item.price} kr.
-                      </Caption>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          );
-        })}
-        {/* </View> */}
-      </ItemRowSkeleton>
-      <ItemRowSkeleton />
-      <ItemRowSkeleton />
+                    {event.name} |{' '}
+                    {new Date(event.date.seconds * 1000).toDateString()},
+                    {` ${timeToString(event.time.hours)}:${timeToString(
+                      event.time.minutes,
+                    )}`}
+                  </Title>
+                  <Caption
+                    style={{
+                      fontSize: scaled(9),
+                      lineHeight: scaled(10),
+                    }}
+                  >
+                    {event.description}
+                  </Caption>
+                </View>
+              </Pressable>
+            );
+          })}
+      </EventRowSkeleton>
     </View>
   );
 };
@@ -221,41 +207,82 @@ const Items: FC<{ itemsState: Item[]; navigation: any }> = ({
 export default function HomeScreen({
   navigation,
 }: StackScreenProps<HomeStackParams, 'Home'>) {
-  const [itemsState, setItemsState] = useState<Array<Item>>([]);
-  const [brandsState, setBrandsState] = useState<Array<Brand>>([]);
+  const user = useAuthenticatedUser();
+  if (!user) {
+    return null;
+  }
+  const [eventsState, setEventsState] = useState<Array<Event>>();
+  const [groupsState, setGroupsState] = useState<Array<Group>>();
   useEffect(() => {
     const f = async () => {
-      const brands = await firestore.getAllBrands();
+      const groups = await firestore.getAllGroups();
       setTimeout(() => {
-        setBrandsState(brands);
-      }, 1000);
+        setGroupsState(groups);
+      }, 0);
     };
     f();
   }, []);
   useEffect(() => {
     const f = async () => {
-      const items = await firestore.getItems();
+      const events = await firestore.getEvents();
       setTimeout(() => {
-        setItemsState(items);
-      }, 2000);
+        setEventsState(events);
+      }, 0);
     };
     f();
-  }, []);
+
+    const unsubscribe = firestore.listenToEvents(
+      user?.uid,
+      (events: Array<Event>) => {
+        setEventsState(events);
+      },
+    );
+    return unsubscribe;
+  }, [user?.uid]);
   return (
-    <ScrollView style={styles.container}>
-      <StatusBar />
-      <Brands
-        navigation={navigation}
-        brandsState={brandsState}
-        getBrandItems={useCallback(
-          (brand: Brand) => itemsState.filter(v => v.brandName === brand.name),
-          [itemsState],
-        )}
-      />
-      <Items itemsState={itemsState} navigation={navigation} />
-    </ScrollView>
+    <ParticleBackgroundContainer>
+      <View style={{ flex: 1, height: '100%', backgroundColor: 'transparent' }}>
+        <ScrollView style={styles.container}>
+          <StatusBar />
+          <Groups
+            navigation={navigation}
+            groupsState={groupsState}
+            getGroupEvents={useCallback(
+              (group: Group) =>
+                eventsState
+                  ? eventsState.filter(v => v.name === group.name)
+                  : [],
+              [eventsState],
+            )}
+          />
+          <Events eventsState={eventsState} navigation={navigation} />
+        </ScrollView>
+        <CustomFAB
+          onPress={() => navigation.navigate('AddEvent')}
+          // label={'Add event'}
+        />
+      </View>
+    </ParticleBackgroundContainer>
   );
 }
+
+const CustomFAB: FC<{ onPress: () => void; label?: string }> = ({
+  onPress,
+  label,
+}) => (
+  <FAB
+    style={{
+      position: 'absolute',
+      margin: 16,
+      right: 0,
+      bottom: 0,
+    }}
+    small
+    icon="plus"
+    onPress={onPress}
+    label={label}
+  />
+);
 
 const ITEM_IMAGE_SIZE = 100;
 const BRAND_IMAGE_HEIGHT = 250;
@@ -264,11 +291,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     display: 'flex',
+    position: 'relative',
     flexDirection: 'column',
     width: '100%',
-    backgroundColor: '#fff',
+    height: '100%',
+    paddingLeft: 10,
+    paddingRight: 10,
+    backgroundColor: 'transparent',
   },
-  brandsRow: {
+  groupsRow: {
     display: 'flex',
     flexDirection: 'row',
     height: '50%',
@@ -283,15 +314,15 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.5,
     shadowRadius: 2.65,
+    backgroundColor: 'transparent',
   },
-  brandImage: {
+  groupImage: {
     height: BRAND_IMAGE_HEIGHT,
     width: BRAND_IMAGE_WIDTH,
-    // flex: 1,
   },
   imageLeftBorder: {
-    borderLeftColor: '#fff',
-    borderLeftWidth: 4,
+    // borderLeftColor: '#fff',
+    // borderLeftWidth: 4,
   },
   title: {
     fontSize: 20,
@@ -302,33 +333,33 @@ const styles = StyleSheet.create({
     height: 1,
     width: '80%',
   },
-  itemsHeading: {
+  eventsHeading: {
     paddingTop: 15,
     paddingBottom: 5,
     paddingLeft: 10,
+    backgroundColor: 'transparent',
   },
-  itemsGrid: {
+  eventsGrid: {
     display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
     paddingLeft: 5,
     paddingRight: 5,
+    backgroundColor: 'transparent',
   },
-  itemsRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    width: '100%',
-  },
-  item: {
+  event: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     paddingBottom: 6,
+    backgroundColor: '#fff',
+    borderRadius: 3,
+    ...shadowStyle,
+    marginBottom: 10,
   },
-  itemImage: {
+  eventImage: {
     height: 100,
     marginBottom: 5,
-    borderRadius: 3,
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3,
   },
 });
