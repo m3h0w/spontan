@@ -1,6 +1,20 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
-  }
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*"],
+    },
+    "types": [
+      "webpack-env",
+      "jest"
+    ],
+    "strict": true,
+    "noImplicitAny": true
+    
+  },
+  // "include": [
+  //   "./**/*",
+  //   "./*",
+  // ]
 }

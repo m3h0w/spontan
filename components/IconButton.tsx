@@ -1,8 +1,20 @@
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { Pressable, StyleSheet, ViewStyle } from 'react-native';
 
-const IconButton = ({ color, size, onPress, name }: {color: string, size: number, onPress: () => {}, name: any}) => {
+function IconButtonComponent({
+  color,
+  size,
+  onPress = () => {},
+  name,
+  style,
+}: {
+  color: string;
+  size: number;
+  onPress?: () => void;
+  name: any;
+  style: ViewStyle;
+}) {
   return (
     <Pressable
       style={args => {
@@ -11,25 +23,28 @@ const IconButton = ({ color, size, onPress, name }: {color: string, size: number
             styles.base,
             {
               opacity: 0.5,
-              backgroundColor: 'transparent'
-            }
+              backgroundColor: 'transparent',
+            },
           ];
         }
 
-        return [styles.base, { opacity: 1, backgroundColor: 'transparent' }];
+        return [
+          styles.base,
+          { opacity: 1, backgroundColor: 'transparent', ...style },
+        ];
       }}
       onPress={onPress}
     >
-      <AntDesign name={name} size={size} color={color} />
+      <MaterialCommunityIcons name={name} size={size} color={color} />
     </Pressable>
   );
-};
+}
 
 const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
-    justifyContent: 'center'
-  }
+    justifyContent: 'center',
+  },
 });
 
-export default IconButton;
+export default IconButtonComponent;

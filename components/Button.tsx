@@ -1,23 +1,29 @@
 import React from 'react';
-import { StyleSheet, Pressable, Text, StyleProp, ViewStyle } from 'react-native';
+import {
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  ViewStyle,
+} from 'react-native';
 
-const Button = ({
+function Button({
   title,
   backgroundColor = '#000',
   titleColor = '#fff',
   titleSize = 14,
   onPress,
   width = '100%',
-  containerStyle
+  containerStyle,
 }: {
-    title: string,
-    backgroundColor?: string,
-    onPress: () => void,
-    titleColor?: string,
-    titleSize?: number,
-    width?: string,
-    containerStyle?: StyleProp<ViewStyle>,
-}) => {
+  title: string;
+  backgroundColor?: string;
+  onPress: () => void;
+  titleColor?: string;
+  titleSize?: number;
+  width?: string;
+  containerStyle?: StyleProp<ViewStyle>;
+}) {
   return (
     <Pressable
       onPress={onPress}
@@ -28,9 +34,9 @@ const Button = ({
             {
               opacity: 0.5,
               backgroundColor,
-              width
+              width,
             },
-            containerStyle
+            containerStyle,
           ];
         }
 
@@ -39,9 +45,9 @@ const Button = ({
           {
             opacity: 1,
             backgroundColor,
-            width
+            width,
           },
-          containerStyle
+          containerStyle,
         ];
       }}
     >
@@ -50,19 +56,19 @@ const Button = ({
       </Text>
     </Pressable>
   );
-};
+}
 
 const styles = StyleSheet.create({
   text: {
-    fontWeight: '600'
+    fontWeight: '600',
   },
   base: {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 42,
     borderRadius: 4,
-    paddingHorizontal: 12
-  }
+    paddingHorizontal: 12,
+  },
 });
 
 export default Button;
